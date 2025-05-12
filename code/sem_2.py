@@ -1,5 +1,3 @@
-from typing import Any
-
 from numpy import ndarray, dtype, float64
 from sem_1 import *
 
