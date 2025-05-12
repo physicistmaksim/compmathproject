@@ -1,8 +1,9 @@
 import numpy as np
 
+
 def create_random_params(n: int) -> np.ndarray:
     """
-    Создает массив случайных параметров размером (8, n) в [0, 1].
+    Создаёт массив случайных параметров размером (8, n) в [0, 1].
 
     Параметры:
     n : int
@@ -58,16 +59,16 @@ def compute_relative_velocities(a: np.ndarray):
 
 def compute_theta(b: np.ndarray, d: float) -> np.ndarray:
     """
-    Вычисляет углы отклонения θ по формуле для твердых сфер.
+    Вычисляет углы отклонения θ по формуле для твёрдых сфер.
 
     Параметры:
-    b : np.ndarray, shape (n,)
+    b : np.ndarray, shape (n)
         Прицельные расстояния.
     d : float
         Диаметр частиц.
 
     Возвращает:
-    theta : np.ndarray, shape (n,)
+    theta : np.ndarray, shape (n)
     """
     # θ = 2 arccos(b/d) если b ≤ d, иначе 0
     return np.where(b <= d, 2 * np.arccos(b / d), 0.0)
@@ -80,9 +81,9 @@ def transform_g(g: np.ndarray, eps: np.ndarray, theta: np.ndarray) -> np.ndarray
     Параметры:
     g : np.ndarray, shape (n, 3)
         Относительные скорости до столкновения.
-    eps : np.ndarray, shape (n,)
+    eps : np.ndarray, shape (n)
         Азимутальные углы.
-    theta : np.ndarray, shape (n,)
+    theta : np.ndarray, shape (n)
         Углы отклонения.
 
     Возвращает:
@@ -141,12 +142,13 @@ def check_and_save(xi: np.ndarray, xi1: np.ndarray, xi_prime: np.ndarray,
     if check_conservation:
         g_before = xi1 - xi
         g_after = xi1_prime - xi_prime
-        eb_before = np.sum(xi**2 + xi1**2, axis=1)
-        eb_after = np.sum(xi_prime**2 + xi1_prime**2, axis=1)
+        eb_before = np.sum(xi ** 2 + xi1 ** 2, axis=1)
+        eb_after = np.sum(xi_prime ** 2 + xi1_prime ** 2, axis=1)
         mb_before = xi + xi1
         mb_after = xi_prime + xi1_prime
         print("Проверки сохранения:")
-        print(f"Относительная скорость: {np.max(np.abs(np.linalg.norm(g_before, axis=1) - np.linalg.norm(g_after, axis=1))):.2e}")
+        print(
+            f"Относительная скорость: {np.max(np.abs(np.linalg.norm(g_before, axis=1) - np.linalg.norm(g_after, axis=1))):.2e}")
         print(f"Энергия: {np.max(np.abs(eb_before - eb_after)):.2e}")
         print(f"Импульс: {np.max(np.abs(mb_before - mb_after)):.2e}")
 
