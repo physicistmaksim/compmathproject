@@ -107,7 +107,9 @@ def compute_collision_integral(f, xi_grid, dxi, xi_cut, N_v, b_max=1.0, tau=0.02
     grid[:, 1] *= b_max ** 2  # S = b^2
     grid[:, 2:5] = grid[:, 2:5] * 2 * xi_cut - xi_cut  # xi_1
     random.shuffle(grid)  # Shuffle grid blocks
-    f_new = f.copy
+    #тут исправил .copy на .copy()
+    f_new = f.copy()
+    
     for v in range(min(N_v, len(grid))):
         epsilon, S, xi_1 = grid[v, 0], grid[v, 1], grid[v, 2:5]
         if np.sqrt(np.sum(xi_1 ** 2)) > xi_cut:
@@ -211,59 +213,7 @@ def compute_norms(f, f_M, xi_grid, dxi, xi_cut):
         mask = ((k - 1) * xi_cut / 3 <= np.sqrt(xi_grid[k-1] ** 2)) & \
                (np.sqrt(xi_grid[k-1] ** 2) <= k * xi_cut / 3)
 
-        # print(f[k-1] - f_M[k-1], "\n")
+        #print(f[k-1] - f_M[k-1], "\n")
         norm = np.sqrt((f[k-1] - f_M[k-1]) ** 2 * mask) * volume
         norms.append(norm)
     return norms
-
-
-def main():
-    N = 20
-    xi_cut = 4.8
-    tau = 0.02
-    T_tilde = 0.95
-    time_steps = int(0.4 / tau)
-    # f_max = 1 / ((2 * pi) ** 1.5)
-    # V_sph = 4 * pi * xi_cut ** 3 / 3
-    N_0 = 4224
-    W_min = (N_0 * xi_cut ** 4) / (6 * sqrt(pi))
-    N_v = int(W_min * tau)
-    f, xi_grid, dxi = initialize_distribution(N, xi_cut, T_tilde, condition=1)
-    n, u, T = compute_macro_parameters(f, xi_grid, dxi)
-    u_star, T_star = newton_method(xi_grid, dxi, u, T)
-    f_M = np.exp(-0.5 * (xi_grid - u_star) ** 2 / T_star)
-    volume = dxi[0] * dxi[1] * dxi[2]
-    f_M /= np.sum(f_M, axis = 0) * volume
-    # print(np.sum((f - f_M) ** 2))
-    initial_norms = compute_norms(f, f_M, xi_grid, dxi, xi_cut)
-    delta_k = []
-    for t in range(time_steps):
-        f = compute_collision_integral(f, xi_grid, dxi, xi_cut, N_v, tau=tau)
-        norms = compute_norms(f, f_M, xi_grid, dxi, xi_cut)
-        delta_k.append([norm / init_norm for norm, init_norm in zip(norms, initial_norms)])
-
-    # Conservation check
-    n_new, u_new, T_new = compute_macro_parameters(f, xi_grid, dxi)
-    print(f"Conservation check: Δn={abs(n_new - n)}, Δu={np.linalg.norm(u_new - u)}, ΔT={abs(T_new - T)}")
-
-    # Symmetry check
-    f_0 = f.copy()
-    tau_sym = 1e-6
-    time_steps_sym = int(100 * tau_sym / tau)
-    for _ in range(time_steps_sym):
-        f = compute_collision_integral(f, xi_grid, dxi, xi_cut, N_v, tau=tau_sym)
-    I = (f - f_0) / (100 * tau_sym)
-    sym_error = sqrt(np.sum((I[:N // 2, :, :] - I[N - 1:N // 2 - 1:-1, :, :]) ** 2)) / sqrt(0.5 * np.sum(I ** 2))
-    print(f"Symmetry error: {sym_error}")
-
-    # Convergence and other checks would require additional runs with different N and p
-    # Plotting delta_k vs model solution
-
-    t = np.array([i * tau for i in range(time_steps)])
-    model = -t * (16 / (5 * sqrt(2 * pi))) * sqrt(T)
-    # Plotting would be done here using matplotlib
-    # Repeat for t=2 and condition=2 as needed
-
-
-if __name__ == "__main__":
-    main()
