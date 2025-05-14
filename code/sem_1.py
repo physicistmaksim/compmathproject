@@ -180,4 +180,4 @@ def simulate_collisions(n: int = 10000,
     xi_prime, xi1_prime = compute_post_collision_velocities(xi, xi1, g_new)
     # 7
     check_and_save(xi, xi1, xi_prime, xi1_prime, check_conservation, save_to_file)
-    return xi_prime, xi1_prime
+    return xi_prime, xi1_prime, a
